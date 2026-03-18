@@ -2,6 +2,7 @@
 
 import { MapPin, ShoppingBag, Truck, Smartphone, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Home() {
   return (

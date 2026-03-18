@@ -8,13 +8,30 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ storeName: "", phone: "" });
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulación de registro
-    setTimeout(() => {
-      window.location.href = "/dashboard/merchant";
-    }, 1500);
+    
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        // En un sistema real usaríamos cookies/session. 
+        // Para el MVP redirigimos al dashboard.
+        window.location.href = "/dashboard/merchant";
+      } else {
+        alert("Error al registrarse");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
