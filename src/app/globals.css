@@ -1,36 +1,39 @@
 @import "tailwindcss";
 
 @theme {
+  --color-primary: oklch(0.623 0.214 259.815);
   --color-background: oklch(0.129 0.042 264.695);
   --color-foreground: oklch(0.985 0 0);
-  --color-primary: oklch(0.623 0.214 259.815);
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
   --radius-3xl: 1.5rem;
 }
 
 @layer base {
-  * {
-    @apply border-white/5;
-  }
   body {
-    @apply bg-background text-foreground antialiased;
+    background-color: oklch(0.129 0.042 264.695);
+    color: oklch(0.985 0 0);
+    @apply antialiased;
   }
 }
 
-/* Premium Glassmorphism & Gradients */
+/* Premium Glassmorphism */
 .glass {
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bg-gradient-premium {
-  background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent),
-              radial-gradient(circle at bottom left, rgba(245, 158, 11, 0.05), transparent);
+  background: 
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 40%),
+    radial-gradient(circle at bottom left, rgba(245, 158, 11, 0.08), transparent 40%),
+    oklch(0.129 0.042 264.695);
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-white to-zinc-500;
+  background: linear-gradient(to bottom right, #ffffff, rgba(255, 255, 255, 0.5));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
