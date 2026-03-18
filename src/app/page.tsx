@@ -18,21 +18,21 @@ export default function Home() {
           Whupi.shop está llegando
         </div>
         
-        <h1 className="mb-6 text-6xl font-bold tracking-tight text-white sm:text-7xl">
-          El mayor invento de <br />
-          <span className="text-primary italic">la humanidad</span>
+        <h1 className="mb-6 text-6xl font-black tracking-tight sm:text-8xl">
+          <span className="text-white">El mayor invento de</span> <br />
+          <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent italic">la humanidad</span>
         </h1>
         
-        <p className="mb-10 text-lg leading-relaxed text-zinc-400">
+        <p className="mb-10 text-xl leading-relaxed text-zinc-400 max-w-2xl mx-auto">
           Transformamos el caos del WhatsApp en una plataforma logística premium. 
           Envíos rápidos para comercios, gestión inteligente para cadetes y tracking real para clientes.
         </p>
 
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <button className="px-8 py-4 font-semibold text-white transition-all bg-primary rounded-xl hover:bg-blue-600 hover:scale-105 active:scale-95">
+        <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
+          <button className="px-10 py-5 font-black text-white transition-all bg-primary rounded-2xl hover:bg-blue-600 hover:scale-105 active:scale-95 shadow-2xl shadow-primary/40">
             Comenzar ahora
           </button>
-          <button className="px-8 py-4 font-semibold text-white transition-all border rounded-xl glass border-white/10 hover:bg-white/5">
+          <button className="px-10 py-5 font-bold text-white transition-all border rounded-2xl glass border-white/10 hover:bg-white/5">
             Saber más
           </button>
         </div>
