@@ -5,13 +5,22 @@ import { motion } from "framer-motion";
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen px-4 text-center">
+    <main className="flex flex-col items-center min-h-screen">
+      {/* Navbar Minimalista */}
+      <nav className="w-full max-w-7xl flex items-center justify-between p-6 z-50">
+        <div className="text-2xl font-black tracking-widest text-white">WHUPI</div>
+        <div className="flex items-center gap-6">
+          <Link href="/login" className="text-zinc-400 hover:text-white font-bold transition-colors">Entrar</Link>
+          <Link href="/register" className="bg-primary text-white px-6 py-2 rounded-xl font-black hover:bg-blue-600 transition-all shadow-lg shadow-primary/20">Crear cuenta</Link>
+        </div>
+      </nav>
+
       {/* Hero Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="max-w-3xl"
+        className="max-w-4xl text-center mt-20 px-4"
       >
         <div className="inline-flex items-center px-3 py-1 mb-6 text-sm font-medium border rounded-full glass border-white/10 text-primary">
           <span className="flex w-2 h-2 mr-2 rounded-full bg-primary animate-pulse" />
