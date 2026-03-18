@@ -16,7 +16,7 @@ import { clsx } from "clsx";
 const navItems = [
   { name: "Dashboard", href: "/dashboard/merchant", icon: LayoutDashboard },
   { name: "Nuevo Pedido", href: "/dashboard/merchant/new-order", icon: PackagePlus },
-  { name: "Gestión Pedidos", href: "/dashboard/merchant/orders", icon: ClipboardList },
+  { name: "Inventario", href: "/dashboard/merchant/inventory", icon: ClipboardList },
   { name: "Mi Tienda", href: "/dashboard/merchant/store", icon: Store },
   { name: "Riders en Red", href: "/dashboard/merchant/riders", icon: Bike },
 ];

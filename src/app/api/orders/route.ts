@@ -5,7 +5,14 @@ import { v4 as uuidv4 } from "uuid";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { customerName, phone, address, amount, paymentMethod, merchantId } = body;
+    
+    // Soporte para ambos formatos (Manual y Storefront)
+    const merchantId = body.merchant_id || body.merchantId || "m-lodejacinto";
+    const phone = body.customer_phone || body.phone;
+    const address = body.customer_address || body.address;
+    const amount = body.total_amount || body.amount;
+    const paymentMethod = body.payment_method || body.paymentMethod || "CASH";
+    const items = body.items || [];
 
     const orderId = uuidv4();
 
@@ -14,16 +21,27 @@ export async function POST(req: Request) {
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         orderId, 
-        merchantId || "m-lodejacinto", // Hardcoded for now
+        merchantId, 
         phone, 
         address, 
-        parseFloat(amount.replace(/[^0-9.]/g, "") || "0"), 
+        typeof amount === 'string' ? parseFloat(amount.replace(/[^0-9.]/g, "") || "0") : amount, 
         paymentMethod, 
         "PENDING"
       ]
     );
 
-    return NextResponse.json({ success: true, orderId });
+    // Si hay items, los insertamos en order_items
+    if (items && Array.isArray(items) && items.length > 0) {
+      for (const item of items) {
+        await db.execute(
+          `INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) 
+           VALUES (?, ?, ?, ?, ?)`,
+          [uuidv4(), orderId, item.id, item.quantity, item.price]
+        );
+      }
+    }
+
+    return NextResponse.json({ success: true, id: orderId });
   } catch (error) {
     console.error("Error creating order:", error);
     return NextResponse.json({ success: false, error: "Error al crear el pedido" }, { status: 500 });
