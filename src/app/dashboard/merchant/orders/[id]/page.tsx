@@ -24,18 +24,20 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetch(`/api/orders/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setOrder(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
+  const handleStatusUpdate = async (newStatus: string) => {
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
       });
-  }, [id]);
+      if (res.ok) {
+        setOrder({ ...order, status: newStatus });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (loading) return <div className="p-20 flex justify-center"><Loader2 className="w-10 h-10 animate-spin text-primary" /></div>;
   if (!order) return <div className="p-20 text-center text-white">No se encontró el pedido.</div>;
@@ -47,11 +49,16 @@ export default function OrderDetailPage() {
             <ChevronLeft className="w-5 h-5" /> Volver
          </button>
          <div className="flex gap-4">
+            {order.status === 'PENDING' && (
+               <button 
+                 onClick={() => handleStatusUpdate('ACCEPTED')}
+                 className="px-6 py-2 bg-primary text-white font-bold rounded-2xl hover:bg-blue-600 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
+               >
+                 <CheckCircle2 className="w-4 h-4" /> Aceptar Pedido
+               </button>
+            )}
             <button className="p-3 bg-white/5 border border-white/10 rounded-2xl text-zinc-400 hover:text-white transition-all">
                <Printer className="w-5 h-5" />
-            </button>
-            <button className="p-3 bg-white/5 border border-white/10 rounded-2xl text-zinc-400 hover:text-white transition-all">
-               <Share2 className="w-5 h-5" />
             </button>
          </div>
       </div>
@@ -131,6 +138,7 @@ export default function OrderDetailPage() {
 function StatusBadge({ status }: { status: string }) {
    const styles: any = {
       'PENDING': { color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Clock },
+      'ACCEPTED': { color: 'text-primary', bg: 'bg-primary/10', icon: CheckCircle2 },
       'DELIVERING': { color: 'text-blue-500', bg: 'bg-blue-500/10', icon: AlertCircle },
       'COMPLETED': { color: 'text-green-500', bg: 'bg-green-500/10', icon: CheckCircle2 },
       'CANCELLED': { color: 'text-red-500', bg: 'bg-red-500/10', icon: AlertCircle },
