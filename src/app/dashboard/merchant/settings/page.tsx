@@ -51,7 +51,9 @@ export default function SettingsPage() {
     tax_mode: "NONE",
     notify_cash_drawer: false,
     sound_on_sale: true,
-    service_hours: {}
+    service_hours: {},
+    bank_alias: "",
+    bank_details: ""
   });
 
   useEffect(() => {

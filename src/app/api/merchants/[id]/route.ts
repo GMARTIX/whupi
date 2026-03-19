@@ -36,7 +36,8 @@ export async function PATCH(
       category, city, email, stock_display_mode,
       enable_pickup, enable_delivery, enable_tips,
       tip_percentage, tax_mode, service_hours,
-      notify_cash_drawer, sound_on_sale
+      notify_cash_drawer, sound_on_sale,
+      bank_alias, bank_details
     } = await req.json();
 
     await db.execute(
@@ -47,7 +48,8 @@ export async function PATCH(
            category = ?, city = ?, email = ?, stock_display_mode = ?,
            enable_pickup = ?, enable_delivery = ?, enable_tips = ?,
            tip_percentage = ?, tax_mode = ?, service_hours = ?,
-           notify_cash_drawer = ?, sound_on_sale = ?
+           notify_cash_drawer = ?, sound_on_sale = ?,
+           bank_alias = ?, bank_details = ?
        WHERE id = ?`,
       [
         store_name, address, whatsapp_number, logo_url, lat || null, lng || null,
@@ -57,6 +59,7 @@ export async function PATCH(
         enable_pickup ? 1 : 0, enable_delivery ? 1 : 0, enable_tips ? 1 : 0,
         tip_percentage, tax_mode, JSON.stringify(service_hours || {}),
         notify_cash_drawer ? 1 : 0, sound_on_sale ? 1 : 0,
+        bank_alias, bank_details,
         id
       ]
     );

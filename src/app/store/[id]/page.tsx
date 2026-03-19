@@ -124,9 +124,14 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
       ? `🛵 Envío a: ${orderForm.address}%0A💰 Costo Envío: $${shippingCost}` 
       : `🏪 Retiro en local`;
     
-    const paymentOptions = { "CASH": "💵 Efectivo", "TRANSFER": "🏦 Transferencia", "MP": "💳 Mercado Pago" };
+    let paymentText = `💳 Pago: ${paymentOptions[paymentMethod]}`;
     
-    const message = `¡Hola! Quiero hacer un pedido:%0A%0A${itemsText}%0A%0A${deliveryText}%0A💳 Pago: ${paymentOptions[paymentMethod]}%0A%0A⭐ Total: $${total}%0A%0A👤 Nombre: ${orderForm.name}%0A📱 Tel: +54 9 ${orderForm.phone}`;
+    if (paymentMethod === "TRANSFER" || paymentMethod === "MP") {
+      const bankInfo = `%0A%0A📌 *Datos de Pago:*%0AAlias: ${merchant?.bank_alias || 'N/A'}%0A${merchant?.bank_details || ''}%0A%0A⚠️ *Por favor envía el comprobante por aquí para confirmar tu pedido.*`;
+      paymentText += bankInfo;
+    }
+
+    const message = `¡Hola! Quiero hacer un pedido:%0A%0A${itemsText}%0A%0A${deliveryText}%0A${paymentText}%0A%0A⭐ Total: $${total}%0A%0A👤 Nombre: ${orderForm.name}%0A📱 Tel: +54 9 ${orderForm.phone}`;
     const cleanNumber = (merchant?.whatsapp_number || "5492966227301").replace(/\D/g, "");
     
     window.open(`https://wa.me/${cleanNumber}?text=${message}`);
