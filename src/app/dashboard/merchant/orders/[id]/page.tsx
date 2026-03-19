@@ -126,11 +126,11 @@ export default function OrderDetailPage() {
                   <div className="pt-6 space-y-3">
                      <div className="flex justify-between text-xs text-zinc-500">
                         <span>Subtotal</span>
-                        <span>${(parseFloat(order.total_amount) - parseFloat(order.shipping_cost || 0)).toLocaleString()}</span>
+                        <span>${(parseFloat(order.total_amount) - parseFloat(order.delivery_price || 0)).toLocaleString()}</span>
                      </div>
                      <div className="flex justify-between text-xs text-zinc-500">
                         <span>Envío</span>
-                        <span>${parseFloat(order.shipping_cost || 0).toLocaleString()}</span>
+                        <span>${parseFloat(order.delivery_price || 0).toLocaleString()}</span>
                      </div>
                      <div className="flex justify-between text-lg font-black text-white pt-3 border-t border-white/5">
                         <span>Total del Pedido</span>
@@ -165,7 +165,7 @@ export default function OrderDetailPage() {
                </h2>
                <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2">
                   <p className="text-[10px] font-black text-zinc-500 uppercase">Costo envío</p>
-                  <p className="text-xl font-black text-white">${parseFloat(order.shipping_cost || 0).toLocaleString()}</p>
+                  <p className="text-xl font-black text-white">${parseFloat(order.delivery_price || 0).toLocaleString()}</p>
                </div>
             </div>
          </div>
