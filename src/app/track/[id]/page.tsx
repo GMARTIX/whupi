@@ -169,7 +169,7 @@ export default function TrackingPage() {
                     position={data.rider_location}
                     icon={{
                       url: 'https://cdn-icons-png.flaticon.com/512/3198/3198336.png', // Moto icon
-                      scaledSize: new google.maps.Size(40, 40)
+                      scaledSize: { width: 40, height: 40 } as any
                     }}
                   />
                 )}
@@ -180,7 +180,7 @@ export default function TrackingPage() {
                     position={data.customer_location}
                     icon={{
                       url: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', // Pin icon
-                      scaledSize: new google.maps.Size(30, 30)
+                      scaledSize: { width: 30, height: 30 } as any
                     }}
                   />
                 )}
