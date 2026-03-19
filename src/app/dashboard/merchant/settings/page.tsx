@@ -8,19 +8,27 @@ import {
   Image as ImageIcon, 
   Save, 
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  Truck
 } from "lucide-react";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [merchant, setMerchant] = useState({
+  const [merchant, setMerchant] = useState<any>({
     id: "m-lodejacinto", // Hardcoded for demo
     store_name: "",
     address: "",
     whatsapp_number: "",
-    logo_url: ""
+    logo_url: "",
+    accepts_cash: true,
+    accepts_transfer: true,
+    accepts_mercadopago: true,
+    base_shipping_cost: 1400,
+    per_meter_cost: 0.9,
+    lat: null,
+    lng: null
   });
 
   useEffect(() => {
@@ -56,7 +64,7 @@ export default function SettingsPage() {
     <div className="max-w-4xl space-y-8 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-black text-white tracking-tight">Ajustes del Comercio</h1>
-        <p className="text-zinc-500 text-sm">Configura la identidad de tu tienda y datos de contacto</p>
+        <p className="text-zinc-500 text-sm">Configura la identidad de tu tienda, pagos y logística</p>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
@@ -71,7 +79,7 @@ export default function SettingsPage() {
               <div>
                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 block">Nombre de la Tienda</label>
                 <input 
-                  value={merchant.store_name}
+                  value={merchant.store_name || ""}
                   onChange={e => setMerchant({...merchant, store_name: e.target.value})}
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-white focus:outline-none focus:border-primary transition-all"
                 />
@@ -81,7 +89,7 @@ export default function SettingsPage() {
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                   <input 
-                    value={merchant.address}
+                    value={merchant.address || ""}
                     onChange={e => setMerchant({...merchant, address: e.target.value})}
                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-3 text-white focus:outline-none focus:border-primary transition-all"
                   />
@@ -100,7 +108,7 @@ export default function SettingsPage() {
               <div>
                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2 block">WhatsApp de Pedidos</label>
                 <input 
-                  value={merchant.whatsapp_number}
+                  value={merchant.whatsapp_number || ""}
                   onChange={e => setMerchant({...merchant, whatsapp_number: e.target.value})}
                   placeholder="+54..."
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-white focus:outline-none focus:border-primary transition-all"
@@ -111,7 +119,7 @@ export default function SettingsPage() {
                 <div className="relative">
                   <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                   <input 
-                    value={merchant.logo_url}
+                    value={merchant.logo_url || ""}
                     onChange={e => setMerchant({...merchant, logo_url: e.target.value})}
                     placeholder="https://..."
                     className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-5 py-3 text-white focus:outline-none focus:border-primary transition-all"
@@ -120,12 +128,11 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </div>
 
-          {/* Settings Group */}
+          {/* Payment & Logistics */}
           <div className="p-8 rounded-[40px] border border-white/5 glass bg-zinc-900/50 space-y-6 md:col-span-2">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-               <CheckCircle2 className="w-5 h-5 text-primary" /> Configuración de Pagos y Logística
+              <Truck className="w-5 h-5 text-primary" /> Pagos y Logística
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -134,36 +141,36 @@ export default function SettingsPage() {
                   <div className="space-y-3">
                      <label className="flex items-center justify-between p-4 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all">
                         <span className="font-bold text-sm">Efectivo</span>
-                        <input type="checkbox" checked={merchant.accepts_cash} onChange={e => setMerchant({...merchant, accepts_cash: e.target.checked})} className="w-5 h-5 accent-primary" />
+                        <input type="checkbox" checked={!!merchant.accepts_cash} onChange={e => setMerchant({...merchant, accepts_cash: e.target.checked})} className="w-5 h-5 accent-primary" />
                      </label>
                      <label className="flex items-center justify-between p-4 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all">
                         <span className="font-bold text-sm">Transferencia</span>
-                        <input type="checkbox" checked={merchant.accepts_transfer} onChange={e => setMerchant({...merchant, accepts_transfer: e.target.checked})} className="w-5 h-5 accent-primary" />
+                        <input type="checkbox" checked={!!merchant.accepts_transfer} onChange={e => setMerchant({...merchant, accepts_transfer: e.target.checked})} className="w-5 h-5 accent-primary" />
                      </label>
                      <label className="flex items-center justify-between p-4 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all">
                         <span className="font-bold text-sm">Mercado Pago</span>
-                        <input type="checkbox" checked={merchant.accepts_mercadopago} onChange={e => setMerchant({...merchant, accepts_mercadopago: e.target.checked})} className="w-5 h-5 accent-primary" />
+                        <input type="checkbox" checked={!!merchant.accepts_mercadopago} onChange={e => setMerchant({...merchant, accepts_mercadopago: e.target.checked})} className="w-5 h-5 accent-primary" />
                      </label>
                   </div>
                </div>
 
                <div className="space-y-4">
-                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Costos de Logística</p>
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Costos de Envío</p>
                   <div className="space-y-4">
                      <div>
                         <label className="text-xs text-zinc-500 block mb-2">Costo Base ($)</label>
                         <input 
                            type="number"
-                           value={merchant.base_shipping_cost}
+                           value={merchant.base_shipping_cost || 0}
                            onChange={e => setMerchant({...merchant, base_shipping_cost: Number(e.target.value)})}
                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-white focus:outline-none focus:border-primary"
                         />
                      </div>
                      <div>
-                        <label className="text-xs text-zinc-500 block mb-2">Costo por cada 100m ($)</label>
+                        <label className="text-xs text-zinc-500 block mb-2">Costo cada 100m ($)</label>
                         <input 
                            type="number"
-                           value={merchant.per_meter_cost}
+                           value={merchant.per_meter_cost || 0}
                            onChange={e => setMerchant({...merchant, per_meter_cost: Number(e.target.value)})}
                            className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-white focus:outline-none focus:border-primary"
                         />
@@ -174,7 +181,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-4">
+        <div className="flex items-center justify-end gap-4 pb-12">
           {success && (
             <span className="text-green-500 font-bold flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
               <CheckCircle2 className="w-5 h-5" /> Cambios guardados
@@ -183,7 +190,7 @@ export default function SettingsPage() {
           <button 
             type="submit"
             disabled={saving}
-            className="bg-primary text-white px-8 py-4 rounded-2xl font-black hover:bg-blue-600 transition-all shadow-xl shadow-primary/20 flex items-center gap-3 disabled:opacity-50"
+            className="bg-primary text-white px-10 py-4 rounded-[24px] font-black hover:bg-blue-600 transition-all shadow-xl shadow-primary/20 flex items-center gap-3 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Save className="w-5 h-5" /> Guardar Cambios</>}
           </button>
