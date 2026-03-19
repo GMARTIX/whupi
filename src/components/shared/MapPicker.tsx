@@ -12,17 +12,16 @@ const containerStyle = {
 
 interface MapPickerProps {
   onLocationSelect: (lat: number, lng: number, address: string) => void;
-  initialCenter: { lat: number, lng: number };
+  center: { lat: number, lng: number };
 }
 
-export default function MapPicker({ onLocationSelect, initialCenter }: MapPickerProps) {
+export default function MapPicker({ onLocationSelect, center }: MapPickerProps) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
     libraries: ['places']
   });
 
-  const [markerPos, setMarkerPos] = useState(initialCenter);
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const onLoad = useCallback(function callback(map: google.maps.Map) {
@@ -36,9 +35,7 @@ export default function MapPicker({ onLocationSelect, initialCenter }: MapPicker
   const handleMarkerDragEnd = async (e: google.maps.MapMouseEvent) => {
     if (e.latLng) {
       const newPos = { lat: e.latLng.lat(), lng: e.latLng.lng() };
-      setMarkerPos(newPos);
       
-      // Reverse Geocoding to get address
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ location: newPos }, (results, status) => {
         if (status === "OK" && results?.[0]) {
@@ -55,7 +52,7 @@ export default function MapPicker({ onLocationSelect, initialCenter }: MapPicker
       <div className="relative overflow-hidden rounded-[24px] border border-white/10">
         <GoogleMap
           mapContainerStyle={containerStyle}
-          center={initialCenter}
+          center={center}
           zoom={15}
           onLoad={onLoad}
           onUnmount={onUnmount}
@@ -63,24 +60,14 @@ export default function MapPicker({ onLocationSelect, initialCenter }: MapPicker
             disableDefaultUI: true,
             zoomControl: true,
             styles: [
-              {
-                "elementType": "geometry",
-                "stylers": [{"color": "#242f3e"}]
-              },
-              {
-                "elementType": "labels.text.stroke",
-                "stylers": [{"color": "#242f3e"}]
-              },
-              {
-                "elementType": "labels.text.fill",
-                "stylers": [{"color": "#746855"}]
-              },
-              // more dark mode styles could be added here
+              { "elementType": "geometry", "stylers": [{"color": "#242f3e"}] },
+              { "elementType": "labels.text.stroke", "stylers": [{"color": "#242f3e"}] },
+              { "elementType": "labels.text.fill", "stylers": [{"color": "#746855"}] }
             ]
           }}
         >
           <Marker 
-            position={markerPos} 
+            position={center} 
             draggable={true} 
             onDragEnd={handleMarkerDragEnd}
             icon={{
@@ -97,7 +84,7 @@ export default function MapPicker({ onLocationSelect, initialCenter }: MapPicker
       </div>
       <div className="flex items-center gap-2 p-4 bg-white/5 rounded-2xl border border-white/5">
          <MapPin className="w-4 h-4 text-primary shrink-0" />
-         <span className="text-zinc-500 text-xs">Mueve el globo azul para ubicar tu domicilio exacto</span>
+         <span className="text-zinc-500 text-xs">Mueve el globo azul para mayor precisión</span>
       </div>
     </div>
   );
