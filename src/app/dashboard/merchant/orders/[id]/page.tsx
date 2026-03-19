@@ -100,19 +100,44 @@ export default function OrderDetailPage() {
                </div>
             </div>
 
-            {/* Items */}
-            <div className="p-8 rounded-[40px] border border-white/5 glass bg-zinc-900/50 space-y-6">
                <h2 className="text-lg font-bold text-white flex items-center gap-2">
                   <Package className="w-5 h-5 text-primary" /> Productos
                </h2>
-               <div className="space-y-4">
-                  {/* Since details are in JSON usually, we'd parse here. Mocking for now from total description if available */}
-                  <div className="flex justify-between items-center py-4 border-b border-white/5">
-                     <span className="text-sm text-zinc-400">Ver detalles en el mensaje de WhatsApp</span>
-                     <span className="font-black text-white">${parseFloat(order.total_amount).toLocaleString()}</span>
+               <div className="divide-y divide-white/5">
+                  {order.items && order.items.length > 0 ? (
+                     order.items.map((item: any) => (
+                        <div key={item.id} className="flex justify-between items-center py-4">
+                           <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[10px] font-bold text-zinc-500">
+                                 {item.quantity}x
+                              </div>
+                              <span className="text-sm font-medium text-white">{item.name}</span>
+                           </div>
+                           <span className="font-black text-white">${parseFloat((item.unit_price * item.quantity) as any).toLocaleString()}</span>
+                        </div>
+                     ))
+                  ) : (
+                     <div className="flex justify-between items-center py-4">
+                        <span className="text-sm text-zinc-400">Ver detalles en el mensaje de WhatsApp</span>
+                        <span className="font-black text-white">${parseFloat(order.total_amount).toLocaleString()}</span>
+                     </div>
+                  )}
+                  
+                  <div className="pt-6 space-y-3">
+                     <div className="flex justify-between text-xs text-zinc-500">
+                        <span>Subtotal</span>
+                        <span>${(parseFloat(order.total_amount) - parseFloat(order.shipping_cost || 0)).toLocaleString()}</span>
+                     </div>
+                     <div className="flex justify-between text-xs text-zinc-500">
+                        <span>Envío</span>
+                        <span>${parseFloat(order.shipping_cost || 0).toLocaleString()}</span>
+                     </div>
+                     <div className="flex justify-between text-lg font-black text-white pt-3 border-t border-white/5">
+                        <span>Total del Pedido</span>
+                        <span className="text-primary">${parseFloat(order.total_amount).toLocaleString()}</span>
+                     </div>
                   </div>
                </div>
-            </div>
          </div>
 
          <div className="space-y-8">

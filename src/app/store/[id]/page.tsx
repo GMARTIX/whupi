@@ -134,6 +134,20 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
     const message = `¡Hola! Quiero hacer un pedido:%0A%0A${itemsText}%0A%0A${deliveryText}%0A${paymentText}%0A%0A⭐ Total: $${total}%0A%0A👤 Nombre: ${orderForm.name}%0A📱 Tel: +54 9 ${orderForm.phone}`;
     const cleanNumber = (merchant?.whatsapp_number || "5492966227301").replace(/\D/g, "");
     
+    // Guardar en base de datos primero
+    fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        merchant_id: id,
+        customer_phone: orderForm.phone,
+        customer_address: orderForm.address,
+        total_amount: total,
+        payment_method: paymentMethod,
+        items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))
+      })
+    });
+
     window.open(`https://wa.me/${cleanNumber}?text=${message}`);
   };
 

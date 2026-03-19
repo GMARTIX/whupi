@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const [rows]: any = await db.execute(
+    const [orders]: any = await db.execute(
       `SELECT o.*, m.store_name, r.vehicle_type 
        FROM orders o 
        LEFT JOIN merchants m ON o.merchant_id = m.id 
@@ -16,11 +16,19 @@ export async function GET(
       [id]
     );
 
-    if (rows.length === 0) {
+    if (orders.length === 0) {
       return NextResponse.json({ success: false, error: "Pedido no encontrado" }, { status: 404 });
     }
 
-    return NextResponse.json(rows[0]);
+    const [items]: any = await db.execute(
+      `SELECT oi.*, p.name 
+       FROM order_items oi 
+       JOIN products p ON oi.product_id = p.id 
+       WHERE oi.order_id = ?`,
+      [id]
+    );
+
+    return NextResponse.json({ ...orders[0], items });
   } catch (error) {
     console.error("Error fetching order:", error);
     return NextResponse.json({ success: false, error: "Error del servidor" }, { status: 500 });
