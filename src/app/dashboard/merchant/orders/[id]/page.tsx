@@ -24,6 +24,20 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (!id) return;
+    fetch(`/api/orders/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        setOrder(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, [id]);
+
   const handleStatusUpdate = async (newStatus: string) => {
     try {
       const res = await fetch(`/api/orders/${id}`, {
