@@ -29,13 +29,24 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const { store_name, address, whatsapp_number, logo_url, lat, lng } = await req.json();
+    const { 
+      store_name, address, whatsapp_number, logo_url, lat, lng,
+      accepts_cash, accepts_transfer, accepts_mercadopago,
+      base_shipping_cost, per_meter_cost
+    } = await req.json();
 
     await db.execute(
       `UPDATE merchants 
-       SET store_name = ?, address = ?, whatsapp_number = ?, logo_url = ?, lat = ?, lng = ?
+       SET store_name = ?, address = ?, whatsapp_number = ?, logo_url = ?, lat = ?, lng = ?,
+           accepts_cash = ?, accepts_transfer = ?, accepts_mercadopago = ?,
+           base_shipping_cost = ?, per_meter_cost = ?
        WHERE id = ?`,
-      [store_name, address, whatsapp_number, logo_url, lat || null, lng || null, id]
+      [
+        store_name, address, whatsapp_number, logo_url, lat || null, lng || null,
+        accepts_cash ? 1 : 0, accepts_transfer ? 1 : 0, accepts_mercadopago ? 1 : 0,
+        base_shipping_cost || 1400.00, per_meter_cost || 0.9,
+        id
+      ]
     );
 
     return NextResponse.json({ success: true });

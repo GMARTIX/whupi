@@ -122,6 +122,58 @@ export default function SettingsPage() {
           </div>
         </div>
 
+          {/* Settings Group */}
+          <div className="p-8 rounded-[40px] border border-white/5 glass bg-zinc-900/50 space-y-6 md:col-span-2">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+               <CheckCircle2 className="w-5 h-5 text-primary" /> Configuración de Pagos y Logística
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="space-y-4">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Métodos de Pago</p>
+                  <div className="space-y-3">
+                     <label className="flex items-center justify-between p-4 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all">
+                        <span className="font-bold text-sm">Efectivo</span>
+                        <input type="checkbox" checked={merchant.accepts_cash} onChange={e => setMerchant({...merchant, accepts_cash: e.target.checked})} className="w-5 h-5 accent-primary" />
+                     </label>
+                     <label className="flex items-center justify-between p-4 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all">
+                        <span className="font-bold text-sm">Transferencia</span>
+                        <input type="checkbox" checked={merchant.accepts_transfer} onChange={e => setMerchant({...merchant, accepts_transfer: e.target.checked})} className="w-5 h-5 accent-primary" />
+                     </label>
+                     <label className="flex items-center justify-between p-4 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all">
+                        <span className="font-bold text-sm">Mercado Pago</span>
+                        <input type="checkbox" checked={merchant.accepts_mercadopago} onChange={e => setMerchant({...merchant, accepts_mercadopago: e.target.checked})} className="w-5 h-5 accent-primary" />
+                     </label>
+                  </div>
+               </div>
+
+               <div className="space-y-4">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Costos de Logística</p>
+                  <div className="space-y-4">
+                     <div>
+                        <label className="text-xs text-zinc-500 block mb-2">Costo Base ($)</label>
+                        <input 
+                           type="number"
+                           value={merchant.base_shipping_cost}
+                           onChange={e => setMerchant({...merchant, base_shipping_cost: Number(e.target.value)})}
+                           className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-white focus:outline-none focus:border-primary"
+                        />
+                     </div>
+                     <div>
+                        <label className="text-xs text-zinc-500 block mb-2">Costo por cada 100m ($)</label>
+                        <input 
+                           type="number"
+                           value={merchant.per_meter_cost}
+                           onChange={e => setMerchant({...merchant, per_meter_cost: Number(e.target.value)})}
+                           className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-3 text-white focus:outline-none focus:border-primary"
+                        />
+                     </div>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center justify-end gap-4">
           {success && (
             <span className="text-green-500 font-bold flex items-center gap-2 animate-in fade-in slide-in-from-right-4">
