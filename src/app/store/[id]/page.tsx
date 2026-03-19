@@ -12,13 +12,12 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
-  Search,
   Phone
 } from "lucide-react";
 import MapPicker from "@/components/shared/MapPicker";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 
-const LIBRARIES: ("places" | "geometry" | "drawing" | "visualization")[] = ["places"];
+const LIBRARIES: ("places" | "geometry")[] = ["places", "geometry"];
 
 export default function StorePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -33,8 +32,9 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "" });
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
+  // We only call this ONCE in the entire application tree for this page
   const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-unique-loader',
+    id: 'google-map-script', // Fixed ID to prevent multiple injections
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
     libraries: LIBRARIES
   });
@@ -51,9 +51,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
         setMerchant(mData);
         setProducts(Array.isArray(pData) ? pData : []);
         if (mData.lat && mData.lng) {
-          const mLat = Number(mData.lat);
-          const mLng = Number(mData.lng);
-          setCustomerPos({ lat: mLat, lng: mLng });
+          setCustomerPos({ lat: Number(mData.lat), lng: Number(mData.lng) });
         }
       } catch (error) {
         console.error(error);
@@ -81,19 +79,12 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   };
 
   const calculateShipping = (custLat: number, custLng: number) => {
-    if (!merchant?.lat || !merchant?.lng) return;
+    if (!merchant?.lat || !merchant?.lng || !window.google) return;
     
-    const mLat = Number(merchant.lat);
-    const mLng = Number(merchant.lng);
-
-    const R = 6371e3; // metres
-    const φ1 = mLat * Math.PI/180;
-    const φ2 = custLat * Math.PI/180;
-    const Δφ = (custLat - mLat) * Math.PI/180;
-    const Δλ = (custLng - mLng) * Math.PI/180;
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distanceMeters = R * c;
+    // Using Google Geometry library for precise distance
+    const origin = new google.maps.LatLng(Number(merchant.lat), Number(merchant.lng));
+    const destination = new google.maps.LatLng(custLat, custLng);
+    const distanceMeters = google.maps.geometry.spherical.computeDistanceBetween(origin, destination);
 
     const baseCost = Number(merchant.base_shipping_cost) || 1400;
     const per100m = 90;
@@ -163,7 +154,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
 
       {cart.length > 0 && (
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-md z-50">
-          <button onClick={() => setShowCheckout(true)} className="w-full h-20 rounded-[35px] bg-primary text-white flex items-center justify-between px-8 shadow-[0_20px_50px_rgba(59,130,246,0.3)] hover:scale-[1.02] active:scale-95 transition-all">
+          <button onClick={() => setShowCheckout(true)} className="w-full h-20 rounded-[35px] bg-primary text-white flex items-center justify-between px-8 shadow-2xl">
             <span className="font-black">VER MI PEDIDO</span>
             <span className="text-2xl font-black">${subtotal}</span>
           </button>
@@ -175,7 +166,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
           <div className="w-full max-w-lg bg-zinc-900 rounded-[40px] p-8 space-y-6 max-h-[90vh] overflow-y-auto pb-12">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-black">Finalizar Pedido</h2>
-              <button onClick={() => setShowCheckout(false)} className="px-4 py-2 bg-white/5 rounded-full text-xs font-bold text-zinc-500 hover:text-white">Cerrar</button>
+              <button onClick={() => setShowCheckout(false)} className="text-zinc-500 text-sm">Cerrar</button>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -186,9 +177,14 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
             {deliveryType === "DELIVERY" && (
               <div className="space-y-4 animate-in fade-in">
                 {loadError ? (
-                  <div className="p-4 bg-red-500/10 text-red-500 rounded-2xl text-xs">Error cargando Mapas.</div>
+                  <div className="p-4 bg-red-500/10 text-red-500 rounded-2xl text-xs text-center">
+                     Error al cargar Mapas. Por favor verifica las credenciales.
+                  </div>
                 ) : !isLoaded ? (
-                  <div className="h-40 flex items-center justify-center bg-zinc-800 rounded-3xl"><Loader2 className="animate-spin" /></div>
+                  <div className="h-48 flex flex-col items-center justify-center bg-zinc-800/50 rounded-[32px] border border-white/5 gap-3">
+                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                     <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Cargando Mapa...</p>
+                  </div>
                 ) : (
                   <>
                     <div className="relative">
@@ -209,8 +205,8 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
                     <MapPicker center={customerPos} onLocationSelect={handleLocationSelect} />
 
                     <div className="flex justify-between items-center p-6 bg-primary/10 rounded-3xl border border-primary/20">
-                       <span className="text-sm font-bold opacity-60">COSTO DE ENVÍO</span>
-                       <span className="text-2xl font-black text-primary">${shippingCost > 0 ? `$${shippingCost}` : 'Calculando...'}</span>
+                       <span className="text-sm font-bold opacity-60 uppercase tracking-tighter">Costo de Envío</span>
+                       <span className="text-2xl font-black text-primary">${shippingCost}</span>
                     </div>
                   </>
                 )}
