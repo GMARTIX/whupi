@@ -78,18 +78,22 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
     });
   };
 
+  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "TRANSFER" | "MP">("CASH");
+
   const calculateShipping = (custLat: number, custLng: number) => {
     if (!merchant?.lat || !merchant?.lng || !window.google) return;
     
-    // Using Google Geometry library for precise distance
     const origin = new google.maps.LatLng(Number(merchant.lat), Number(merchant.lng));
     const destination = new google.maps.LatLng(custLat, custLng);
     const distanceMeters = google.maps.geometry.spherical.computeDistanceBetween(origin, destination);
 
     const baseCost = Number(merchant.base_shipping_cost) || 1400;
     const per100m = 90;
-    const extraCost = (distanceMeters / 100) * per100m;
-    setShippingCost(Math.round(baseCost + extraCost));
+    const rawCost = baseCost + (distanceMeters / 100) * per100m;
+    
+    // REDONDEO: Siempre hacia arriba al centenar más cercano
+    const roundedCost = Math.ceil(rawCost / 100) * 100;
+    setShippingCost(roundedCost);
   };
 
   const handleLocationSelect = (lat: number, lng: number, address: string) => {
@@ -120,7 +124,9 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
       ? `🛵 Envío a: ${orderForm.address}%0A💰 Costo Envío: $${shippingCost}` 
       : `🏪 Retiro en local`;
     
-    const message = `¡Hola! Quiero hacer un pedido:%0A%0A${itemsText}%0A%0A${deliveryText}%0A⭐ Total: $${total}%0A%0A👤 Nombre: ${orderForm.name}%0A📱 Tel: +54 9 ${orderForm.phone}`;
+    const paymentOptions = { "CASH": "💵 Efectivo", "TRANSFER": "🏦 Transferencia", "MP": "💳 Mercado Pago" };
+    
+    const message = `¡Hola! Quiero hacer un pedido:%0A%0A${itemsText}%0A%0A${deliveryText}%0A💳 Pago: ${paymentOptions[paymentMethod]}%0A%0A⭐ Total: $${total}%0A%0A👤 Nombre: ${orderForm.name}%0A📱 Tel: +54 9 ${orderForm.phone}`;
     window.open(`https://wa.me/${merchant?.whatsapp_number?.replace(/\+/g, '')}?text=${message}`);
   };
 
@@ -234,7 +240,40 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
                    />
                 </div>
 
-                <div className="bg-black/40 p-6 rounded-[35px] border border-white/5 space-y-2">
+               <div className="space-y-4">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-2">¿Cómo quieres pagar?</p>
+                  <div className="grid grid-cols-1 gap-3">
+                     {merchant?.accepts_cash && (
+                       <button 
+                          onClick={() => setPaymentMethod("CASH")}
+                          className={`p-5 rounded-3xl border-2 flex items-center justify-between transition-all ${paymentMethod === "CASH" ? 'border-primary bg-primary/10' : 'border-white/5 opacity-40'}`}
+                       >
+                         <span className="font-black">EFECTIVO</span>
+                         {paymentMethod === "CASH" && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                       </button>
+                     )}
+                     {merchant?.accepts_transfer && (
+                       <button 
+                          onClick={() => setPaymentMethod("TRANSFER")}
+                          className={`p-5 rounded-3xl border-2 flex items-center justify-between transition-all ${paymentMethod === "TRANSFER" ? 'border-primary bg-primary/10' : 'border-white/5 opacity-40'}`}
+                       >
+                         <span className="font-black">TRANSFERENCIA</span>
+                         {paymentMethod === "TRANSFER" && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                       </button>
+                     )}
+                     {merchant?.accepts_mercadopago && (
+                       <button 
+                          onClick={() => setPaymentMethod("MP")}
+                          className={`p-5 rounded-3xl border-2 flex items-center justify-between transition-all ${paymentMethod === "MP" ? 'border-primary bg-primary/10' : 'border-white/5 opacity-40'}`}
+                       >
+                         <span className="font-black">MERCADO PAGO</span>
+                         {paymentMethod === "MP" && <CheckCircle2 className="w-5 h-5 text-primary" />}
+                       </button>
+                     )}
+                  </div>
+               </div>
+
+               <div className="bg-black/40 p-6 rounded-[35px] border border-white/5 space-y-2">
                    <div className="flex justify-between items-center text-sm text-zinc-500">
                       <span>Subtotal</span>
                       <span>${subtotal}</span>
