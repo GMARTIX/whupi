@@ -127,7 +127,9 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
     const paymentOptions = { "CASH": "💵 Efectivo", "TRANSFER": "🏦 Transferencia", "MP": "💳 Mercado Pago" };
     
     const message = `¡Hola! Quiero hacer un pedido:%0A%0A${itemsText}%0A%0A${deliveryText}%0A💳 Pago: ${paymentOptions[paymentMethod]}%0A%0A⭐ Total: $${total}%0A%0A👤 Nombre: ${orderForm.name}%0A📱 Tel: +54 9 ${orderForm.phone}`;
-    window.open(`https://wa.me/${merchant?.whatsapp_number?.replace(/\+/g, '')}?text=${message}`);
+    const cleanNumber = (merchant?.whatsapp_number || "5492966227301").replace(/\D/g, "");
+    
+    window.open(`https://wa.me/${cleanNumber}?text=${message}`);
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-zinc-950"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;

@@ -32,19 +32,31 @@ export async function PATCH(
     const { 
       store_name, address, whatsapp_number, logo_url, lat, lng,
       accepts_cash, accepts_transfer, accepts_mercadopago,
-      base_shipping_cost, per_meter_cost
+      base_shipping_cost, per_meter_cost,
+      category, city, email, stock_display_mode,
+      enable_pickup, enable_delivery, enable_tips,
+      tip_percentage, tax_mode, service_hours,
+      notify_cash_drawer, sound_on_sale
     } = await req.json();
 
     await db.execute(
       `UPDATE merchants 
        SET store_name = ?, address = ?, whatsapp_number = ?, logo_url = ?, lat = ?, lng = ?,
            accepts_cash = ?, accepts_transfer = ?, accepts_mercadopago = ?,
-           base_shipping_cost = ?, per_meter_cost = ?
+           base_shipping_cost = ?, per_meter_cost = ?,
+           category = ?, city = ?, email = ?, stock_display_mode = ?,
+           enable_pickup = ?, enable_delivery = ?, enable_tips = ?,
+           tip_percentage = ?, tax_mode = ?, service_hours = ?,
+           notify_cash_drawer = ?, sound_on_sale = ?
        WHERE id = ?`,
       [
         store_name, address, whatsapp_number, logo_url, lat || null, lng || null,
         accepts_cash ? 1 : 0, accepts_transfer ? 1 : 0, accepts_mercadopago ? 1 : 0,
-        base_shipping_cost || 1400.00, per_meter_cost || 0.9,
+        base_shipping_cost, per_meter_cost,
+        category, city, email, stock_display_mode,
+        enable_pickup ? 1 : 0, enable_delivery ? 1 : 0, enable_tips ? 1 : 0,
+        tip_percentage, tax_mode, JSON.stringify(service_hours || {}),
+        notify_cash_drawer ? 1 : 0, sound_on_sale ? 1 : 0,
         id
       ]
     );
