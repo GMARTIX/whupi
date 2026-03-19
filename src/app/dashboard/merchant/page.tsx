@@ -80,12 +80,13 @@ export default function MerchantDashboard() {
               </div>
             ) : (
               orders.map((order: any) => (
-                <OrderRow 
-                  key={order.id}
-                  id={`#${order.id.slice(0,4)}`} 
-                  status={order.status} 
-                  customer={order.customer_phone} 
-                />
+                <Link key={order.id} href={`/dashboard/merchant/orders/${order.id}`}>
+                  <OrderRow 
+                    id={`#${order.id.slice(0,4)}`} 
+                    status={order.status} 
+                    customer={order.customer_phone} 
+                  />
+                </Link>
               ))
             )}
           </div>
