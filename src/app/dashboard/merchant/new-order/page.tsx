@@ -9,6 +9,9 @@ import {
   User, 
   ChevronLeft,
   Loader2,
+  Package, 
+  Truck, 
+  Clock, 
   CheckCircle2
 } from "lucide-react";
 import Link from "next/link";
@@ -25,6 +28,7 @@ export default function NewOrderPage() {
     address: "",
     paymentMethod: "Efectivo",
     amount: "",
+    deliveryPrice: "",
     prepTime: "15"
   });
 
@@ -34,7 +38,8 @@ export default function NewOrderPage() {
       ...prev,
       address: parsed.address || prev.address,
       phone: parsed.phone || prev.phone,
-      paymentMethod: parsed.paymentMethod || prev.paymentMethod
+      paymentMethod: parsed.paymentMethod || prev.paymentMethod,
+      deliveryPrice: parsed.deliveryPrice?.toString() || prev.deliveryPrice
     }));
   };
 
@@ -147,18 +152,26 @@ export default function NewOrderPage() {
                 value={formData.amount}
                 onChange={(v: string) => setFormData({...formData, amount: v})}
               />
-              <div className="space-y-2">
-                <label className="text-[10px] uppercase font-bold text-zinc-500 ml-1">Pago</label>
-                <select 
-                  className="w-full bg-white/5 border border-white/5 rounded-xl p-[11px] text-sm text-white outline-none focus:border-primary/50 transition-all cursor-pointer"
-                  value={formData.paymentMethod}
-                  onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
-                >
-                  <option value="Efectivo">Efectivo</option>
-                  <option value="Transferencia">Transferencia</option>
-                  <option value="Pagado">Ya pagado</option>
-                </select>
-              </div>
+              <InputField 
+                label="Costo de Envío" 
+                icon={<Truck className="w-4 h-4" />} 
+                placeholder="$0.00"
+                value={formData.deliveryPrice}
+                onChange={(v: string) => setFormData({...formData, deliveryPrice: v})}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase font-bold text-zinc-500 ml-1">Pago</label>
+              <select 
+                className="w-full bg-white/5 border border-white/5 rounded-xl p-[11px] text-sm text-white outline-none focus:border-primary/50 transition-all cursor-pointer"
+                value={formData.paymentMethod}
+                onChange={(e) => setFormData({...formData, paymentMethod: e.target.value})}
+              >
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Pagado">Ya pagado</option>
+              </select>
             </div>
           </div>
 

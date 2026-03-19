@@ -4,6 +4,7 @@ export interface ParsedOrder {
   paymentMethod: string;
   customerName?: string;
   total?: number;
+  deliveryPrice?: number;
 }
 
 export function parseWhatsAppMessage(text: string): ParsedOrder {
@@ -11,6 +12,7 @@ export function parseWhatsAppMessage(text: string): ParsedOrder {
     address: "",
     phone: "",
     paymentMethod: "Efectivo",
+    deliveryPrice: 0
   };
 
   // Dirección
@@ -24,6 +26,12 @@ export function parseWhatsAppMessage(text: string): ParsedOrder {
   // Forma de pago
   const paymentMatch = text.match(/Forma de pago:\s*([^\n]+)/i);
   if (paymentMatch) result.paymentMethod = paymentMatch[1].trim();
+
+  // Costo de envio (Regex for "Envio: $500" or "Costo envio $600")
+  const deliveryMatch = text.match(/(?:Env[ií]o|Costo env[ií]o):\s*\$?\s*([\d.]+)/i);
+  if (deliveryMatch) {
+    result.deliveryPrice = parseFloat(deliveryMatch[1].replace(/\./g, ''));
+  }
 
   // Fallback for simple single-line messages (ej: "Taqueria zapioala 870 para Lago del desierto 354 pagado")
   if (!result.address) {
