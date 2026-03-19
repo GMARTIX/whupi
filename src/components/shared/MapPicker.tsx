@@ -1,8 +1,8 @@
 "use client";
 
-import { GoogleMap, useJsApiLoader, Marker } from '@react-google-maps/api';
-import { useCallback, useState, useEffect } from 'react';
-import { MapPin, Loader2 } from 'lucide-react';
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import { useCallback, useState } from 'react';
+import { MapPin } from 'lucide-react';
 
 const containerStyle = {
   width: '100%',
@@ -16,12 +16,6 @@ interface MapPickerProps {
 }
 
 export default function MapPicker({ onLocationSelect, center }: MapPickerProps) {
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-    libraries: ['places']
-  });
-
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const onLoad = useCallback(function callback(map: google.maps.Map) {
@@ -44,8 +38,6 @@ export default function MapPicker({ onLocationSelect, center }: MapPickerProps) 
       });
     }
   };
-
-  if (!isLoaded) return <div className="h-[300px] flex items-center justify-center bg-zinc-900/50 rounded-3xl border border-white/5"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
   return (
     <div className="space-y-4">
@@ -84,7 +76,7 @@ export default function MapPicker({ onLocationSelect, center }: MapPickerProps) 
       </div>
       <div className="flex items-center gap-2 p-4 bg-white/5 rounded-2xl border border-white/5">
          <MapPin className="w-4 h-4 text-primary shrink-0" />
-         <span className="text-zinc-500 text-xs">Mueve el globo azul para mayor precisión</span>
+         <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Mueve el marcador azul para precisión exacta</span>
       </div>
     </div>
   );

@@ -12,7 +12,8 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock,
-  Search
+  Search,
+  Phone
 } from "lucide-react";
 import MapPicker from "@/components/shared/MapPicker";
 import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
@@ -32,7 +33,8 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   const [orderForm, setOrderForm] = useState({ name: "", phone: "", address: "" });
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
-  const { isLoaded } = useJsApiLoader({
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: 'google-map-unique-loader',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
     libraries: LIBRARIES
   });
@@ -49,7 +51,9 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
         setMerchant(mData);
         setProducts(Array.isArray(pData) ? pData : []);
         if (mData.lat && mData.lng) {
-          setCustomerPos({ lat: Number(mData.lat), lng: Number(mData.lng) });
+          const mLat = Number(mData.lat);
+          const mLng = Number(mData.lng);
+          setCustomerPos({ lat: mLat, lng: mLng });
         }
       } catch (error) {
         console.error(error);
@@ -79,11 +83,14 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   const calculateShipping = (custLat: number, custLng: number) => {
     if (!merchant?.lat || !merchant?.lng) return;
     
+    const mLat = Number(merchant.lat);
+    const mLng = Number(merchant.lng);
+
     const R = 6371e3; // metres
-    const φ1 = merchant.lat * Math.PI/180;
+    const φ1 = mLat * Math.PI/180;
     const φ2 = custLat * Math.PI/180;
-    const Δφ = (custLat - merchant.lat) * Math.PI/180;
-    const Δλ = (custLng - merchant.lng) * Math.PI/180;
+    const Δφ = (custLat - mLat) * Math.PI/180;
+    const Δλ = (custLng - mLng) * Math.PI/180;
     const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const distanceMeters = R * c;
@@ -95,7 +102,6 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   };
 
   const handleLocationSelect = (lat: number, lng: number, address: string) => {
-    console.log("Location selected:", lat, lng, address);
     setCustomerPos({ lat, lng });
     setOrderForm(prev => ({ ...prev, address }));
     calculateShipping(lat, lng);
@@ -116,6 +122,16 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const finalShipping = deliveryType === "DELIVERY" ? shippingCost : 0;
   const total = subtotal + finalShipping;
+
+  const handleWhatsAppOrder = () => {
+    const itemsText = cart.map(item => `- ${item.quantity}x ${item.name}`).join('%0A');
+    const deliveryText = deliveryType === "DELIVERY" 
+      ? `🛵 Envío a: ${orderForm.address}%0A💰 Costo Envío: $${shippingCost}` 
+      : `🏪 Retiro en local`;
+    
+    const message = `¡Hola! Quiero hacer un pedido:%0A%0A${itemsText}%0A%0A${deliveryText}%0A⭐ Total: $${total}%0A%0A👤 Nombre: ${orderForm.name}%0A📱 Tel: +54 9 ${orderForm.phone}`;
+    window.open(`https://wa.me/${merchant?.whatsapp_number?.replace(/\+/g, '')}?text=${message}`);
+  };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-zinc-950"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
@@ -147,7 +163,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
 
       {cart.length > 0 && (
         <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-[calc(100%-48px)] max-w-md z-50">
-          <button onClick={() => setShowCheckout(true)} className="w-full h-20 rounded-[35px] bg-primary text-white flex items-center justify-between px-8 shadow-2xl">
+          <button onClick={() => setShowCheckout(true)} className="w-full h-20 rounded-[35px] bg-primary text-white flex items-center justify-between px-8 shadow-[0_20px_50px_rgba(59,130,246,0.3)] hover:scale-[1.02] active:scale-95 transition-all">
             <span className="font-black">VER MI PEDIDO</span>
             <span className="text-2xl font-black">${subtotal}</span>
           </button>
@@ -156,51 +172,95 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
 
       {showCheckout && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/90 backdrop-blur-xl p-4">
-          <div className="w-full max-w-lg bg-zinc-900 rounded-[40px] p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-lg bg-zinc-900 rounded-[40px] p-8 space-y-6 max-h-[90vh] overflow-y-auto pb-12">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-black">Finalizar Pedido</h2>
-              <button onClick={() => setShowCheckout(false)} className="text-zinc-500 text-sm">Cerrar</button>
+              <button onClick={() => setShowCheckout(false)} className="px-4 py-2 bg-white/5 rounded-full text-xs font-bold text-zinc-500 hover:text-white">Cerrar</button>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-               <button onClick={() => setDeliveryType("DELIVERY")} className={`py-4 rounded-3xl border-2 font-black ${deliveryType === "DELIVERY" ? 'border-primary bg-primary/10' : 'border-white/5 text-zinc-600'}`}>ENVÍO</button>
-               <button onClick={() => setDeliveryType("PICKUP")} className={`py-4 rounded-3xl border-2 font-black ${deliveryType === "PICKUP" ? 'border-primary bg-primary/10' : 'border-white/5 text-zinc-600'}`}>RETIRO</button>
+               <button onClick={() => setDeliveryType("DELIVERY")} className={`py-4 rounded-3xl border-2 font-black transition-all ${deliveryType === "DELIVERY" ? 'border-primary bg-primary/10 text-white' : 'border-white/5 text-zinc-600'}`}>ENVÍO</button>
+               <button onClick={() => setDeliveryType("PICKUP")} className={`py-4 rounded-3xl border-2 font-black transition-all ${deliveryType === "PICKUP" ? 'border-primary bg-primary/10 text-white' : 'border-white/5 text-zinc-600'}`}>RETIRO</button>
             </div>
 
-            {deliveryType === "DELIVERY" && isLoaded && (
+            {deliveryType === "DELIVERY" && (
               <div className="space-y-4 animate-in fade-in">
-                <div className="relative">
-                  <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-primary z-10" />
-                  <Autocomplete
-                    onLoad={auto => autocompleteRef.current = auto}
-                    onPlaceChanged={onPlaceChanged}
-                  >
-                    <input 
-                      placeholder="Escribe tu dirección..."
-                      className="w-full pl-14 pr-6 py-4 rounded-3xl bg-white/5 border border-white/10 outline-none focus:border-primary text-white"
-                      value={orderForm.address}
-                      onChange={e => setOrderForm({...orderForm, address: e.target.value})}
-                    />
-                  </Autocomplete>
-                </div>
-                
-                <MapPicker center={customerPos} onLocationSelect={handleLocationSelect} />
+                {loadError ? (
+                  <div className="p-4 bg-red-500/10 text-red-500 rounded-2xl text-xs">Error cargando Mapas.</div>
+                ) : !isLoaded ? (
+                  <div className="h-40 flex items-center justify-center bg-zinc-800 rounded-3xl"><Loader2 className="animate-spin" /></div>
+                ) : (
+                  <>
+                    <div className="relative">
+                      <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-primary z-10" />
+                      <Autocomplete
+                        onLoad={auto => autocompleteRef.current = auto}
+                        onPlaceChanged={onPlaceChanged}
+                      >
+                        <input 
+                          placeholder="Escribe tu dirección..."
+                          className="w-full pl-14 pr-6 py-4 rounded-3xl bg-white/5 border border-white/10 outline-none focus:border-primary text-white"
+                          value={orderForm.address}
+                          onChange={e => setOrderForm({...orderForm, address: e.target.value})}
+                        />
+                      </Autocomplete>
+                    </div>
+                    
+                    <MapPicker center={customerPos} onLocationSelect={handleLocationSelect} />
 
-                <div className="flex justify-between items-center p-6 bg-primary/10 rounded-3xl border border-primary/20">
-                   <span className="text-sm font-bold opacity-60">COSTO DE ENVÍO</span>
-                   <span className="text-2xl font-black text-primary">${shippingCost}</span>
-                </div>
+                    <div className="flex justify-between items-center p-6 bg-primary/10 rounded-3xl border border-primary/20">
+                       <span className="text-sm font-bold opacity-60">COSTO DE ENVÍO</span>
+                       <span className="text-2xl font-black text-primary">${shippingCost > 0 ? `$${shippingCost}` : 'Calculando...'}</span>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
             <div className="space-y-4 pt-4 border-t border-white/5">
-                <input placeholder="Tu nombre" className="w-full px-6 py-4 rounded-3xl bg-white/5 border border-white/10" value={orderForm.name} onChange={e => setOrderForm({...orderForm, name: e.target.value})} />
-                <input placeholder="WhatsApp" className="w-full px-6 py-4 rounded-3xl bg-white/5 border border-white/10" value={orderForm.phone} onChange={e => setOrderForm({...orderForm, phone: e.target.value})} />
-                <div className="flex justify-between items-center text-2xl font-black pt-4">
-                   <span>TOTAL</span>
-                   <span>${total}</span>
+                <input 
+                  placeholder="Tu nombre completo" 
+                  className="w-full px-6 py-4 rounded-3xl bg-white/5 border border-white/10 focus:border-primary outline-none" 
+                  value={orderForm.name} 
+                  onChange={e => setOrderForm({...orderForm, name: e.target.value})} 
+                />
+                
+                <div className="flex gap-3">
+                   <div className="flex items-center gap-2 px-5 bg-white/5 border border-white/10 rounded-3xl">
+                      <span className="text-xl">🇦🇷</span>
+                      <span className="font-bold text-xs text-zinc-400">+54 9</span>
+                   </div>
+                   <input 
+                      placeholder="WhatsApp (ej: 2966123456)"
+                      value={orderForm.phone}
+                      onChange={e => setOrderForm({...orderForm, phone: e.target.value})}
+                      className="flex-1 px-6 py-4 rounded-3xl bg-white/5 border border-white/10 focus:border-primary outline-none transition-all"
+                   />
                 </div>
-                <button className="w-full py-5 bg-primary text-white font-black rounded-3xl shadow-xl">PEDIR POR WHATSAPP</button>
+
+                <div className="bg-black/40 p-6 rounded-[35px] border border-white/5 space-y-2">
+                   <div className="flex justify-between items-center text-sm text-zinc-500">
+                      <span>Subtotal</span>
+                      <span>${subtotal}</span>
+                   </div>
+                   {deliveryType === "DELIVERY" && (
+                    <div className="flex justify-between items-center text-sm text-primary">
+                       <span>Envío</span>
+                       <span>+ ${shippingCost}</span>
+                    </div>
+                   )}
+                   <div className="flex justify-between items-center text-2xl font-black pt-2 border-t border-white/10 mt-2">
+                      <span>TOTAL</span>
+                      <span>${total}</span>
+                   </div>
+                </div>
+
+                <button 
+                  onClick={handleWhatsAppOrder}
+                  className="w-full py-5 bg-primary text-white font-black rounded-[30px] shadow-xl hover:scale-[1.01] active:scale-95 transition-all text-lg"
+                >
+                  REALIZAR PEDIDO
+                </button>
             </div>
           </div>
         </div>
