@@ -14,7 +14,8 @@ import {
   AlertCircle,
   Loader2,
   Share2,
-  Printer
+  Printer,
+  Bike
 } from "lucide-react";
 import Link from "next/link";
 
@@ -63,9 +64,9 @@ export default function OrderDetailPage() {
             <ChevronLeft className="w-5 h-5" /> Volver
          </button>
           <div className="flex gap-4">
-            {(order.status === 'ACCEPTED' || order.status === 'DELIVERING') && (
+            {(order.status === 'ACCEPTED' || order.status === 'READY_TO_PICKUP' || order.status === 'DELIVERING') && (
                <a 
-                 href={`https://wa.me/${order.customer_phone}?text=${encodeURIComponent(`¡Hola! Tu pedido de Whupi está en camino. Puedes seguirlo en vivo aquí: https://whupi.shop/track/${id}`)}`}
+                 href={`https://wa.me/${order.customer_phone}?text=${encodeURIComponent(`¡Hola! Tu pedido de Whupi está procesado. Sigue el progreso aquí: https://whupi.shop/track/${id}`)}`}
                  target="_blank"
                  rel="noopener noreferrer"
                  className="px-6 py-2 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 transition-all shadow-lg shadow-green-900/20 flex items-center gap-2"
@@ -73,6 +74,7 @@ export default function OrderDetailPage() {
                  <Share2 className="w-4 h-4" /> Compartir Seguimiento
                </a>
             )}
+            
             {order.status === 'PENDING' && (
                <button 
                  onClick={() => handleStatusUpdate('ACCEPTED')}
@@ -81,14 +83,16 @@ export default function OrderDetailPage() {
                  <CheckCircle2 className="w-4 h-4" /> Aceptar Pedido
                </button>
             )}
+            
             {order.status === 'ACCEPTED' && (
                <button 
-                 onClick={() => handleStatusUpdate('DELIVERING')}
+                 onClick={() => handleStatusUpdate('READY_TO_PICKUP')}
                  className="px-6 py-2 bg-zinc-800 text-white font-bold rounded-2xl hover:bg-zinc-700 transition-all border border-white/5 flex items-center gap-2"
                >
-                 <Truck className="w-4 h-4" /> Marcar en Camino
+                 <Package className="w-4 h-4" /> Marcar Listo para Retirar
                </button>
             )}
+
             <button className="p-3 bg-white/5 border border-white/10 rounded-2xl text-zinc-400 hover:text-white transition-all">
                <Printer className="w-5 h-5" />
             </button>
@@ -194,11 +198,12 @@ export default function OrderDetailPage() {
 
 function StatusBadge({ status }: { status: string }) {
    const styles: any = {
-      'PENDING': { color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Clock },
-      'ACCEPTED': { color: 'text-primary', bg: 'bg-primary/10', icon: CheckCircle2 },
-      'DELIVERING': { color: 'text-blue-500', bg: 'bg-blue-500/10', icon: AlertCircle },
-      'COMPLETED': { color: 'text-green-500', bg: 'bg-green-500/10', icon: CheckCircle2 },
-      'CANCELLED': { color: 'text-red-500', bg: 'bg-red-500/10', icon: AlertCircle },
+      'PENDING': { label: 'PENDIENTE', color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Clock },
+      'ACCEPTED': { label: 'EN PREPARACIÓN', color: 'text-primary', bg: 'bg-primary/10', icon: Package },
+      'READY_TO_PICKUP': { label: 'LISTO PARA RETIRAR', color: 'text-purple-500', bg: 'bg-purple-500/10', icon: CheckCircle2 },
+      'DELIVERING': { label: 'EN CAMINO', color: 'text-blue-500', bg: 'bg-blue-500/10', icon: Bike },
+      'COMPLETED': { label: 'ENTREGADO', color: 'text-green-500', bg: 'bg-green-500/10', icon: CheckCircle2 },
+      'CANCELLED': { label: 'CANCELADO', color: 'text-red-500', bg: 'bg-red-500/10', icon: AlertCircle },
    };
 
    const s = styles[status] || styles['PENDING'];
@@ -207,7 +212,7 @@ function StatusBadge({ status }: { status: string }) {
    return (
       <span className={`inline-flex items-center gap-2 px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-tighter ${s.bg} ${s.color}`}>
          <Icon className="w-4 h-4" />
-         {status}
+         {s.label}
       </span>
    );
 }

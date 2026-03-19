@@ -7,6 +7,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
+    // 1. Obtener datos actuales de Whupi
     const [orders]: any = await db.execute(
       `SELECT o.*, m.store_name, r.vehicle_type 
        FROM orders o 
@@ -20,6 +22,38 @@ export async function GET(
       return NextResponse.json({ success: false, error: "Pedido no encontrado" }, { status: 404 });
     }
 
+    let order = orders[0];
+
+    // 2. BACK-SYNC: Consultar a Pediclub para ver si hubo avances del repartidor
+    if (order.status !== 'COMPLETED' && order.status !== 'CANCELLED') {
+      try {
+        const [pediclubOrders]: any = await pediclubDb.execute(
+          "SELECT ped_estado FROM fi_pedidos WHERE ped_comentarios LIKE ? ORDER BY ped_id DESC LIMIT 1",
+          [`%Whupi Order: ${id}%`]
+        );
+
+        if (pediclubOrders.length > 0) {
+          const pcStatus = pediclubOrders[0].ped_estado;
+          let newWhupiStatus = null;
+
+          if (pcStatus === 3 && order.status !== 'DELIVERING') {
+            newWhupiStatus = 'DELIVERING';
+          } else if (pcStatus === 4 && order.status !== 'COMPLETED') {
+            newWhupiStatus = 'COMPLETED';
+          }
+
+          if (newWhupiStatus) {
+            console.log(`Back-sync: Updating order ${id} status to ${newWhupiStatus} based on Pediclub.`);
+            await db.execute("UPDATE orders SET status = ? WHERE id = ?", [newWhupiStatus, id]);
+            order.status = newWhupiStatus;
+          }
+        }
+      } catch (e: any) {
+        console.error("Back-sync error:", e.message);
+      }
+    }
+
+    // 3. Obtener items
     const [items]: any = await db.execute(
       `SELECT oi.*, p.name 
        FROM order_items oi 
@@ -28,7 +62,7 @@ export async function GET(
       [id]
     );
 
-    return NextResponse.json({ ...orders[0], items });
+    return NextResponse.json({ ...order, items });
   } catch (error) {
     console.error("Error fetching order:", error);
     return NextResponse.json({ success: false, error: "Error del servidor" }, { status: 500 });

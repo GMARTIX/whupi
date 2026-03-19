@@ -21,30 +21,33 @@ export async function GET(
     const order = orders[0];
     let riderLocation = null;
 
-    // 2. Intentar buscar ubicación del rider en Pediclub (siempre que el pedido exista)
-    try {
-      const [pediclubOrders]: any = await pediclubDb.execute(
-        "SELECT ped_rep_id, ped_estado FROM fi_pedidos WHERE ped_comentarios LIKE ? ORDER BY ped_id DESC LIMIT 1",
-        [`%Whupi Order: ${id}%`]
-      );
-
-      if (pediclubOrders.length > 0 && pediclubOrders[0].ped_rep_id > 0) {
-        const riderId = pediclubOrders[0].ped_rep_id;
-        
-        const [riders]: any = await pediclubDb.execute(
-          "SELECT latlong FROM fi_usuario WHERE usua_id = ?",
-          [riderId]
+    // 2. Intentar buscar ubicación del rider en Pediclub
+    // Solo mostramos la ubicación si el estado en Whupi es 'DELIVERING'
+    if (order.status === 'DELIVERING') {
+      try {
+        const [pediclubOrders]: any = await pediclubDb.execute(
+          "SELECT ped_rep_id, ped_estado FROM fi_pedidos WHERE ped_comentarios LIKE ? ORDER BY ped_id DESC LIMIT 1",
+          [`%Whupi Order: ${id}%`]
         );
 
-        if (riders.length > 0 && riders[0].latlong && riders[0].latlong.includes(',')) {
-          const [lat, lng] = riders[0].latlong.split(',').map((c: string) => parseFloat(c.trim()));
-          if (!isNaN(lat) && !isNaN(lng)) {
-            riderLocation = { lat, lng };
+        if (pediclubOrders.length > 0 && pediclubOrders[0].ped_rep_id > 0) {
+          const riderId = pediclubOrders[0].ped_rep_id;
+          
+          const [riders]: any = await pediclubDb.execute(
+            "SELECT latlong FROM fi_usuario WHERE usua_id = ?",
+            [riderId]
+          );
+
+          if (riders.length > 0 && riders[0].latlong && riders[0].latlong.includes(',')) {
+            const [lat, lng] = riders[0].latlong.split(',').map((c: string) => parseFloat(c.trim()));
+            if (!isNaN(lat) && !isNaN(lng)) {
+              riderLocation = { lat, lng };
+            }
           }
         }
+      } catch (pcError) {
+        console.error("Error fetching rider location from Pediclub:", pcError);
       }
-    } catch (pcError) {
-      console.error("Error fetching rider location from Pediclub:", pcError);
     }
 
     return NextResponse.json({

@@ -128,7 +128,8 @@ export default function TrackingPage() {
 
   const statuses = [
     { key: 'PENDING', label: 'Recibido', icon: Clock, desc: 'El local está revisando tu pedido' },
-    { key: 'ACCEPTED', label: 'Preparando', icon: Package, desc: 'Ya casi está listo para despachar' },
+    { key: 'ACCEPTED', label: 'En Preparación', icon: Package, desc: 'Estamos preparando tus productos' },
+    { key: 'READY_TO_PICKUP', label: 'Listo para Retirar', icon: CheckCircle2, desc: 'El pedido está listo para el repartidor' },
     { key: 'DELIVERING', label: 'En Camino', icon: Bike, desc: 'Un Whupi Rider va a tu ubicación' },
     { key: 'COMPLETED', label: 'Entregado', icon: CheckCircle2, desc: '¡Que lo disfrutes!' }
   ];
