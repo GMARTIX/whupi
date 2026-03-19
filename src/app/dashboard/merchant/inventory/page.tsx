@@ -33,9 +33,14 @@ export default function InventoryPage() {
     try {
       const res = await fetch("/api/products?merchantId=m-lodejacinto");
       const data = await res.json();
-      setProducts(data);
+      if (Array.isArray(data)) {
+        setProducts(data);
+      } else {
+        setProducts([]);
+      }
     } catch (error) {
       console.error("Error:", error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
