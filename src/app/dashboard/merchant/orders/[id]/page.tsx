@@ -62,7 +62,17 @@ export default function OrderDetailPage() {
          <button onClick={() => router.back()} className="flex items-center gap-2 text-zinc-500 hover:text-white transition-all font-bold">
             <ChevronLeft className="w-5 h-5" /> Volver
          </button>
-         <div className="flex gap-4">
+          <div className="flex gap-4">
+            {(order.status === 'ACCEPTED' || order.status === 'DELIVERING') && (
+               <a 
+                 href={`https://wa.me/${order.customer_phone}?text=${encodeURIComponent(`¡Hola! Tu pedido de Whupi está en camino. Puedes seguirlo en vivo aquí: https://whupi.shop/track/${id}`)}`}
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="px-6 py-2 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 transition-all shadow-lg shadow-green-900/20 flex items-center gap-2"
+               >
+                 <Share2 className="w-4 h-4" /> Compartir Seguimiento
+               </a>
+            )}
             {order.status === 'PENDING' && (
                <button 
                  onClick={() => handleStatusUpdate('ACCEPTED')}
@@ -71,10 +81,18 @@ export default function OrderDetailPage() {
                  <CheckCircle2 className="w-4 h-4" /> Aceptar Pedido
                </button>
             )}
+            {order.status === 'ACCEPTED' && (
+               <button 
+                 onClick={() => handleStatusUpdate('DELIVERING')}
+                 className="px-6 py-2 bg-zinc-800 text-white font-bold rounded-2xl hover:bg-zinc-700 transition-all border border-white/5 flex items-center gap-2"
+               >
+                 <Truck className="w-4 h-4" /> Marcar en Camino
+               </button>
+            )}
             <button className="p-3 bg-white/5 border border-white/10 rounded-2xl text-zinc-400 hover:text-white transition-all">
                <Printer className="w-5 h-5" />
             </button>
-         </div>
+          </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
