@@ -10,8 +10,10 @@ export async function POST(req: Request) {
     
     // Soporte para ambos formatos (Manual y Storefront)
     const merchantId = body.merchant_id || body.merchantId || "m-lodejacinto";
+    const customerName = body.customer_name || body.customerName || body.name || "Cliente Whupi";
     const phone = body.customer_phone || body.phone;
     const address = body.customer_address || body.address;
+    const deliveryPrice = body.delivery_price || body.deliveryPrice || 0;
     const amount = body.total_amount || body.amount;
     const paymentMethod = body.payment_method || body.paymentMethod || "CASH";
     const items = body.items || [];
@@ -19,13 +21,15 @@ export async function POST(req: Request) {
     const orderId = uuidv4();
 
     await db.execute(
-      `INSERT INTO orders (id, merchant_id, customer_phone, customer_address, total_amount, payment_method, status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO orders (id, customer_name, merchant_id, customer_phone, customer_address, delivery_price, total_amount, payment_method, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         orderId, 
+        customerName,
         merchantId, 
         phone, 
         address, 
+        deliveryPrice,
         typeof amount === 'string' ? parseFloat(amount.replace(/[^0-9.]/g, "") || "0") : amount, 
         paymentMethod, 
         "PENDING"

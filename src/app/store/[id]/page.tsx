@@ -141,6 +141,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           merchant_id: id,
+          customer_name: orderForm.name,
           customer_phone: orderForm.phone,
           customer_address: orderForm.address,
           total_amount: total,
