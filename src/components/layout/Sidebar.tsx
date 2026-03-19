@@ -19,6 +19,7 @@ const navItems = [
   { name: "Inventario", href: "/dashboard/merchant/inventory", icon: ClipboardList },
   { name: "Mi Tienda", href: "/dashboard/merchant/store", icon: Store },
   { name: "Riders en Red", href: "/dashboard/merchant/riders", icon: Bike },
+  { name: "Configuraciones", href: "/dashboard/merchant/settings", icon: Settings },
 ];
 
 export function Sidebar() {
