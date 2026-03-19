@@ -123,7 +123,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
     const deliveryText = deliveryType === "DELIVERY" 
       ? `🛵 Envío a: ${orderForm.address}%0A💰 Costo Envío: $${shippingCost}` 
       : `🏪 Retiro en local`;
-    
+    const paymentOptions: any = { "CASH": "💵 Efectivo", "TRANSFER": "🏦 Transferencia", "MP": "💳 Mercado Pago" };
     let paymentText = `💳 Pago: ${paymentOptions[paymentMethod]}`;
     
     if (paymentMethod === "TRANSFER" || paymentMethod === "MP") {
