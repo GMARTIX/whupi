@@ -118,7 +118,7 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
   const finalShipping = deliveryType === "DELIVERY" ? shippingCost : 0;
   const total = subtotal + finalShipping;
 
-  const handleWhatsAppOrder = () => {
+  const handleWhatsAppOrder = async () => {
     const itemsText = cart.map(item => `- ${item.quantity}x ${item.name}`).join('%0A');
     const deliveryText = deliveryType === "DELIVERY" 
       ? `🛵 Envío a: ${orderForm.address}%0A💰 Costo Envío: $${shippingCost}` 
@@ -135,18 +135,22 @@ export default function StorePage({ params }: { params: Promise<{ id: string }> 
     const cleanNumber = (merchant?.whatsapp_number || "5492966227301").replace(/\D/g, "");
     
     // Guardar en base de datos primero
-    fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        merchant_id: id,
-        customer_phone: orderForm.phone,
-        customer_address: orderForm.address,
-        total_amount: total,
-        payment_method: paymentMethod,
-        items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))
-      })
-    });
+    try {
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          merchant_id: id,
+          customer_phone: orderForm.phone,
+          customer_address: orderForm.address,
+          total_amount: total,
+          payment_method: paymentMethod,
+          items: cart.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))
+        })
+      });
+    } catch (err) {
+      console.error("Error saving order:", err);
+    }
 
     window.open(`https://wa.me/${cleanNumber}?text=${message}`);
   };
