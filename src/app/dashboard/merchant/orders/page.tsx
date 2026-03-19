@@ -115,7 +115,7 @@ export default function OrdersPage() {
 function StatusBadge({ status }: { status: string }) {
    const styles: any = {
       'PENDING': { color: 'text-amber-500', bg: 'bg-amber-500/10', icon: Clock },
-      'DELIVERING': { color: 'text-blue-500', bg: 'bg-blue-500/10', icon: Truck => AlertCircle },
+      'DELIVERING': { color: 'text-blue-500', bg: 'bg-blue-500/10', icon: AlertCircle },
       'COMPLETED': { color: 'text-green-500', bg: 'bg-green-500/10', icon: CheckCircle2 },
       'CANCELLED': { color: 'text-red-500', bg: 'bg-red-500/10', icon: AlertCircle },
    };
